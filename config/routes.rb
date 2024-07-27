@@ -1,8 +1,16 @@
 Rails.application.routes.draw do
   resources :votes, except: [:edit]
-  resources :polls, except: [:edit]
+  resources :polls, except: [:edit] do
+    member do
+      get 'results'
+    end
+  end
   resources :candidates, except: [:edit]
   resources :users, except: [:edit]
+
+  get 'user_metrics/percent_voted_in_multiple_polls', to: 'user_metrics#percent_voted_in_multiple_polls'
+
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,5 +1,5 @@
 class PollsController < ApplicationController
-  before_action :set_poll, only: %i[ show update destroy ]
+  before_action :set_poll, only: %i[ show update destroy results ]
 
   # GET /polls or /polls.json
   def index
@@ -40,6 +40,11 @@ class PollsController < ApplicationController
     respond_to do |format|
       format.json { head :no_content }
     end
+  end
+
+  # GET /polls/1/results or /polls/1/results.json
+  def results
+    render json: {data: @poll.results}
   end
 
   private
