@@ -50,12 +50,12 @@ RSpec.describe "/polls", type: :request do
         }.to change(Poll, :count).by(0)
       end
 
-    
+
       it "renders a response with 422 status (i.e. to display the 'new' template)" do
         post polls_url, params: { poll: invalid_attributes, format: :json }
         expect(response).to have_http_status(:unprocessable_entity)
       end
-    
+
     end
   end
 
@@ -81,13 +81,13 @@ RSpec.describe "/polls", type: :request do
     end
 
     context "with invalid parameters" do
-    
+
       skip "renders a response with 422 status (i.e. to display the 'edit' template)" do
         poll = Poll.create! valid_attributes
         patch poll_url(poll), params: { poll: invalid_attributes, format: :json }
         expect(response).to have_http_status(:unprocessable_entity)
       end
-    
+
     end
   end
 
@@ -97,6 +97,38 @@ RSpec.describe "/polls", type: :request do
       expect {
         delete poll_url(poll)
       }.to change(Poll, :count).by(-1)
+    end
+  end
+
+  describe 'GET /results' do
+    it 'gets the results of the  given poll' do
+      poll = Poll.create!(valid_attributes)
+      user =  User.create!(name: "The Employee1", email: 'employee1@oftheyear.com')
+      candidate = Candidate.create!(name: 'Employee1', poll: poll)
+      Vote.create!(candidate: candidate, user: user)
+      Vote.create!(candidate: candidate, user: user)
+      Candidate.create!(name: 'Employee2', poll: poll)
+
+      poll_results = {
+        'Employee1' => 2,
+        'Employee2' => 0
+      }
+      get results_poll_path(poll)
+      expect(response.status).to eq(200)
+      response_json = JSON.parse(response.body)
+      expect(response_json['data']).to eq(poll_results)
+    end
+
+    it 'renders a response with 404 if the poll cannot be found' do
+      get results_poll_path('invalid')
+      expect(response.status).to eq(404)
+    end
+
+    it 'renders a response with 500 if an unexpected error occurs' do
+      poll = Poll.create! valid_attributes
+      allow_any_instance_of(Poll).to receive(:results).and_raise('Error')
+      get results_poll_path(poll)
+      expect(response.status).to eq(500)
     end
   end
 end
